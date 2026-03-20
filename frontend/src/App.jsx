@@ -4,6 +4,83 @@ const API = "http://localhost:5001/api";
 
 const TABS = ["Dashboard", "Users", "Courses", "Assignments", "Enrollments", "Add User"];
 
+// ── Toast Popup ───────────────────────────────────────────────────
+function Toast({ show, onClose }) {
+  useEffect(() => {
+    if (show) {
+      const t = setTimeout(onClose, 4000);
+      return () => clearTimeout(t);
+    }
+  }, [show, onClose]);
+
+  return (
+    <div style={{
+      position: "fixed", bottom: 32, right: 32, zIndex: 9999,
+      transform: show ? "translateY(0)" : "translateY(120px)",
+      opacity: show ? 1 : 0,
+      transition: "transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease",
+      pointerEvents: show ? "auto" : "none",
+    }}>
+      <div style={{
+        background: "linear-gradient(135deg, #0f2a1a, #0d1f2d)",
+        border: "1px solid rgba(52,211,153,0.4)",
+        borderRadius: 14,
+        padding: "16px 20px",
+        display: "flex", alignItems: "center", gap: 14,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(52,211,153,0.1), 0 0 24px rgba(52,211,153,0.1)",
+        minWidth: 300, position: "relative", overflow: "hidden",
+      }}>
+        {/* Animated check icon */}
+        <div style={{
+          width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
+          background: "rgba(52,211,153,0.15)",
+          border: "2px solid rgba(52,211,153,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 20, color: "#34d399",
+          animation: "popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.1s both",
+        }}>
+          ✓
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <div style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 700, fontSize: 14, color: "#34d399", marginBottom: 3,
+          }}>
+            Connection Established!
+          </div>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 11, color: "#64748b",
+          }}>
+            MySQL · P4DB · localhost:3306
+          </div>
+        </div>
+
+        {/* Close button */}
+        <button onClick={onClose} style={{
+          background: "none", border: "none", color: "#475569",
+          cursor: "pointer", fontSize: 16, padding: 2,
+          lineHeight: 1, flexShrink: 0,
+        }}>✕</button>
+
+        {/* Progress bar countdown */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0, height: 3,
+          borderRadius: "0 0 14px 14px", overflow: "hidden",
+        }}>
+          <div style={{
+            height: "100%",
+            background: "linear-gradient(90deg, #34d399, #06b6d4)",
+            animation: show ? "shrink 4s linear forwards" : "none",
+            transformOrigin: "left",
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Helpers ──────────────────────────────────────────────────────
 function StatusBadge({ ok }) {
   return (
@@ -67,8 +144,7 @@ function Table({ data }) {
             >
               {keys.map((k) => (
                 <td key={k} style={{ padding: "10px 14px", color: "#cbd5e1" }}>
-                  {row[k] === null ? <span style={{ color: "#475569" }}>NULL</span>
-                    : String(row[k])}
+                  {row[k] === null ? <span style={{ color: "#475569" }}>NULL</span> : String(row[k])}
                 </td>
               ))}
             </tr>
@@ -154,8 +230,11 @@ function AddUser({ onSuccess }) {
       <Card style={{ maxWidth: 460 }}>
         {["name", "email", "password"].map((field) => (
           <div key={field} style={{ marginBottom: 16 }}>
-            <label style={{ display: "block", color: "#63b3ed", fontSize: 11, fontFamily: "monospace",
-              letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+            <label style={{
+              display: "block", color: "#63b3ed", fontSize: 11,
+              fontFamily: "monospace", letterSpacing: "0.1em",
+              textTransform: "uppercase", marginBottom: 6,
+            }}>
               {field}
             </label>
             <input
@@ -169,8 +248,8 @@ function AddUser({ onSuccess }) {
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 8, padding: "10px 14px",
-                color: "#e2e8f0", fontFamily: "'JetBrains Mono', monospace", fontSize: 14,
-                outline: "none",
+                color: "#e2e8f0", fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 14, outline: "none",
               }}
               onFocus={e => e.target.style.borderColor = "#63b3ed"}
               onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
@@ -180,8 +259,8 @@ function AddUser({ onSuccess }) {
         <button onClick={submit} disabled={loading} style={{
           width: "100%", padding: "12px", borderRadius: 8, border: "none",
           background: loading ? "#334155" : "linear-gradient(135deg, #3b82f6, #06b6d4)",
-          color: "#fff", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
-          fontSize: 14, cursor: loading ? "not-allowed" : "pointer",
+          color: "#fff", fontFamily: "'JetBrains Mono', monospace",
+          fontWeight: 700, fontSize: 14, cursor: loading ? "not-allowed" : "pointer",
           letterSpacing: "0.05em", transition: "opacity 0.2s",
         }}>
           {loading ? "INSERTING..." : "INSERT USER"}
@@ -219,11 +298,15 @@ export default function App() {
   const [tab, setTab] = useState("Dashboard");
   const [status, setStatus] = useState(null);
   const [summary, setSummary] = useState([]);
+  const [showToast, setShowToast] = useState(false);
 
   const fetchStatus = () =>
     fetch(`${API}/status`)
       .then((r) => r.json())
-      .then(setStatus)
+      .then((d) => {
+        setStatus(d);
+        if (d.connected) setShowToast(true);
+      })
       .catch(() => setStatus({ connected: false }));
 
   const fetchSummary = () =>
@@ -239,7 +322,6 @@ export default function App() {
 
   return (
     <>
-      {/* Google Fonts */}
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
 
       <style>{`
@@ -247,17 +329,20 @@ export default function App() {
         body { background: #060d1a; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+        @keyframes shrink { from{transform:scaleX(1)} to{transform:scaleX(0)} }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 999px; }
       `}</style>
 
-      {/* Background */}
+      {/* Toast Popup */}
+      <Toast show={showToast} onClose={() => setShowToast(false)} />
+
       <div style={{
         minHeight: "100vh", position: "relative",
         background: "radial-gradient(ellipse at 20% 0%, #0c2340 0%, #060d1a 60%)",
       }}>
-        {/* Grid overlay */}
         <div style={{
           position: "fixed", inset: 0, pointerEvents: "none",
           backgroundImage: "linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px)",
@@ -285,10 +370,26 @@ export default function App() {
                 MySQL · P4DB · localhost:3306
               </p>
             </div>
-            <StatusBadge ok={status?.connected} />
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <StatusBadge ok={status?.connected} />
+              {status?.connected && (
+                <button onClick={() => setShowToast(true)} style={{
+                  padding: "5px 12px", borderRadius: 6,
+                  background: "rgba(52,211,153,0.1)",
+                  border: "1px solid rgba(52,211,153,0.25)",
+                  color: "#34d399", fontSize: 11,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  cursor: "pointer", letterSpacing: "0.05em",
+                  transition: "all 0.15s",
+                }}>
+                  show popup
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Connection Info */}
+          {/* Connection Info Bar */}
           {status?.connected && (
             <Card style={{ marginBottom: 28, display: "flex", gap: 24, flexWrap: "wrap" }}>
               {[
