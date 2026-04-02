@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS CourseDay (
   courseID INT NOT NULL,
   day VARCHAR(20) NOT NULL,
   PRIMARY KEY (courseID, day),
-  FOREIGN KEY (courseID) REFERENCES Course(courseID)
+  FOREIGN KEY (courseID) REFERENCES Course(courseID) ON DELETE CASCADE
 );
 
 -- Enrollment
@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS Enrollment (
   courseID INT NOT NULL,
   enrollmentDate DATETIME,
   status VARCHAR(20),
-  FOREIGN KEY (userID) REFERENCES `User`(userID),
-  FOREIGN KEY (courseID) REFERENCES Course(courseID)
+  FOREIGN KEY (userID) REFERENCES `User`(userID) ON DELETE CASCADE,
+  FOREIGN KEY (courseID) REFERENCES Course(courseID) ON DELETE CASCADE
 );
 
 -- Assignment
@@ -50,8 +50,8 @@ CREATE TABLE IF NOT EXISTS Assignment (
   priority VARCHAR(20),
   grade VARCHAR(5),
   status VARCHAR(20),
-  FOREIGN KEY (courseID) REFERENCES Course(courseID),
-  FOREIGN KEY (userID) REFERENCES `User`(userID)
+  FOREIGN KEY (courseID) REFERENCES Course(courseID) ON DELETE CASCADE,
+  FOREIGN KEY (userID) REFERENCES `User`(userID) ON DELETE CASCADE
 );
 
 -- TimeLog
@@ -61,8 +61,8 @@ CREATE TABLE IF NOT EXISTS TimeLog (
   assignmentID INT NOT NULL,
   startTime DATETIME,
   endTime DATETIME,
-  FOREIGN KEY (userID) REFERENCES `User`(userID),
-  FOREIGN KEY (assignmentID) REFERENCES Assignment(assignmentID)
+  FOREIGN KEY (userID) REFERENCES `User`(userID) ON DELETE CASCADE,
+  FOREIGN KEY (assignmentID) REFERENCES Assignment(assignmentID) ON DELETE CASCADE
 );
 
 -- Notification
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS Notification (
   type VARCHAR(50),
   sendTime DATETIME,
   readStatus VARCHAR(20),
-  FOREIGN KEY (userID) REFERENCES `User`(userID)
+  FOREIGN KEY (userID) REFERENCES `User`(userID) ON DELETE CASCADE
 );
 
 -- Organization
@@ -89,8 +89,8 @@ CREATE TABLE IF NOT EXISTS OrganizationMembership (
   userID INT NOT NULL,
   organizationID INT NOT NULL,
   role VARCHAR(50),
-  FOREIGN KEY (userID) REFERENCES `User`(userID),
-  FOREIGN KEY (organizationID) REFERENCES Organization(organizationID)
+  FOREIGN KEY (userID) REFERENCES `User`(userID) ON DELETE CASCADE,
+  FOREIGN KEY (organizationID) REFERENCES Organization(organizationID) ON DELETE CASCADE
 );
 
 -- Event
@@ -104,8 +104,8 @@ CREATE TABLE IF NOT EXISTS Event (
   endTime DATETIME,
   location VARCHAR(200),
   isRecurring VARCHAR(5),
-  FOREIGN KEY (userID) REFERENCES `User`(userID),
-  FOREIGN KEY (organizationID) REFERENCES Organization(organizationID)
+  FOREIGN KEY (userID) REFERENCES `User`(userID) ON DELETE CASCADE,
+  FOREIGN KEY (organizationID) REFERENCES Organization(organizationID) ON DELETE CASCADE
 );
 
 -- EventDay
@@ -113,5 +113,5 @@ CREATE TABLE IF NOT EXISTS EventDay (
   eventID INT NOT NULL,
   day VARCHAR(20) NOT NULL,
   PRIMARY KEY (eventID, day),
-  FOREIGN KEY (eventID) REFERENCES Event(eventID)
+  FOREIGN KEY (eventID) REFERENCES Event(eventID) ON DELETE CASCADE
 );
