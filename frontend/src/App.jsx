@@ -126,6 +126,9 @@ const T = {
   red:          "#dc2626",
   redBg:        "rgba(220,38,38,0.08)",
   redBorder:    "rgba(220,38,38,0.25)",
+  blue:         "#1d4ed8",
+  blueBg:       "rgba(29,78,216,0.08)",
+  blueBorder:   "rgba(29,78,216,0.25)",
   shadow:       "0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04)",
   shadowMd:     "0 4px 16px rgba(0,0,0,0.07),0 2px 6px rgba(0,0,0,0.04)",
   shadowHover:  "0 8px 24px rgba(59,130,246,0.12),0 2px 8px rgba(0,0,0,0.05)",
@@ -298,7 +301,7 @@ function SubTabs({ active, setActive }) {
 
 function DataTable({ data, actionCol }) {
   if (!data || data.length === 0)
-    return <p style={{ color: T.textMuted, fontFamily: T.mono, fontSize: 13, padding: "20px 0" }}>No records found.</p>;
+    return <p style={{ color: "#94a3b8", fontFamily: T.mono, fontSize: 13, padding: "20px 0" }}>No data yet—start by inserting a record.</p>;
   const keys = Object.keys(data[0]);
   return (
     <div style={{ overflowX: "auto" }}>
@@ -344,29 +347,38 @@ function DataTable({ data, actionCol }) {
 const MAX_COUNT = 15;
 
 function Dashboard({ summary }) {
+  const cards = summary && summary.length > 0 ? summary : [
+    { table: "Users", rows: 0 },
+    { table: "Courses", rows: 0 },
+    { table: "Assignments", rows: 0 },
+    { table: "Enrollments", rows: 0 },
+  ];
+
   return (
-    <div>
-      <div style={{ marginBottom: 24 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <div>
         <h2 style={sectionTitle}>Database Overview</h2>
-        <p style={{ color: T.textMuted, fontSize: 14, fontFamily: T.font, marginTop: 4 }}>
-          Live record counts across all tables
-        </p>
+        <p style={subtitleText}>Live record counts across all tables</p>
       </div>
+
+      {(!summary || summary.length === 0) && (
+        <div style={{ padding: 16, borderRadius: 14, background: "rgba(148,163,184,0.1)", color: "#64748b", fontFamily: T.mono }}>
+          No data yet—start by inserting a record.
+        </div>
+      )}
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))", gap: 14 }}>
-        {summary.map(({ table, rows }) => (
+        {cards.map(({ table, rows }) => (
           <div key={table} style={{
             background: T.bg, border: `1px solid ${T.border}`,
-            borderRadius: 12, padding: "22px 20px", boxShadow: T.shadow,
+            borderRadius: 24, padding: 16, boxShadow: T.shadowMd,
             cursor: "default", transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = T.shadowHover; e.currentTarget.style.borderColor = T.accentBorder; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = T.shadow; e.currentTarget.style.borderColor = T.border; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.03)"; e.currentTarget.style.boxShadow = T.shadowHover; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = T.shadowMd; }}
           >
-            <div style={{ fontSize: 40, fontWeight: 700, color: T.textH, fontFamily: T.font, letterSpacing: "-0.04em", lineHeight: 1, marginBottom: 8 }}>{rows}</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: T.textMuted, fontFamily: T.font, marginBottom: 12 }}>{table}</div>
-            <div style={{ height: 3, borderRadius: 2, background: T.accentBg, overflow: "hidden" }}>
-              <div style={{ height: "100%", background: T.accent, borderRadius: 2, width: `${Math.min((rows / MAX_COUNT) * 100, 100)}%`, transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)" }} />
-            </div>
+            <div style={{ fontSize: 34, fontWeight: 800, color: T.textH, fontFamily: T.font, marginBottom: 8 }}>{rows}</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#64748b", fontFamily: T.font }}>{table}</div>
           </div>
         ))}
       </div>
@@ -695,10 +707,15 @@ function DeletePage({ onSuccess }) {
   );
 }
 
+
 // ── Styles ────────────────────────────────────────────────────────
 const sectionTitle = {
-  fontFamily: T.font, fontSize: 20, fontWeight: 700,
+  fontFamily: T.font, fontSize: 28, fontWeight: 800,
   color: T.textH, margin: 0, letterSpacing: "-0.02em",
+};
+
+const subtitleText = {
+  color: "#8da1b6", fontSize: 14, fontFamily: T.font, marginTop: 6,
 };
 
 const TAB_ICONS = {
@@ -730,7 +747,7 @@ export default function App() {
     const isActive = tab === t;
     const actionMap = {
       Insert: { border: T.greenBorder, bg: T.greenBg, color: T.green,       idle: T.green },
-      Update: { border: T.amberBorder, bg: T.amberBg, color: T.amber,       idle: T.amber },
+      Update: { border: T.blueBorder,  bg: T.blueBg,  color: T.blue,      idle: T.blue  },
       Delete: { border: T.redBorder,   bg: T.redBg,   color: T.red,         idle: T.red   },
     };
     if (actionMap[t]) {
